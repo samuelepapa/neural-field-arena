@@ -17,8 +17,10 @@ from neural_dataset import (
 )
 from neural_dataset.utils import numpy_collate, start_end_idx_from_path
 
+from torch.utils.data import DataLoader
 
-class TestNeFDatapipe(absltest.TestCase):
+
+class TestNeuralDataset(absltest.TestCase):
     SAVE_PATH = "tests/test_models/"
     NUM_FILES = 10
     NUM_ELEMENTS = 100
@@ -26,31 +28,31 @@ class TestNeFDatapipe(absltest.TestCase):
     NUM_CLASSES = 10
 
     def setUp(self):
-        os.makedirs(TestNeFDatapipe.SAVE_PATH, exist_ok=True)
-        for idx in range(TestNeFDatapipe.NUM_FILES):
+        os.makedirs(TestNeuralDataset.SAVE_PATH, exist_ok=True)
+        for idx in range(TestNeuralDataset.NUM_FILES):
             with h5py.File(
                 os.path.join(
-                    TestNeFDatapipe.SAVE_PATH,
-                    f"train_{idx:03d}-{idx+TestNeFDatapipe.NUM_ELEMENTS:03d}.hdf5",
+                    TestNeuralDataset.SAVE_PATH,
+                    f"train_{idx:03d}-{idx+TestNeuralDataset.NUM_ELEMENTS:03d}.hdf5",
                 ),
                 "w",
             ) as f:
                 f.create_dataset(
                     "params",
                     data=np.random.rand(
-                        TestNeFDatapipe.NUM_ELEMENTS, TestNeFDatapipe.HIDDEN_DIM
+                        TestNeuralDataset.NUM_ELEMENTS, TestNeuralDataset.HIDDEN_DIM
                     ).astype(np.float32),
                 )
                 dt = h5py.special_dtype(vlen=str)
                 data = f.create_dataset("param_config", (1,), dtype=dt)
-                data[0] = json.dumps(("layer1", (TestNeFDatapipe.HIDDEN_DIM,)))
+                data[0] = json.dumps(("layer1", (TestNeuralDataset.HIDDEN_DIM,)))
                 f.create_dataset(
                     "labels",
                     data=np.random.randint(
-                        0, TestNeFDatapipe.NUM_CLASSES, (TestNeFDatapipe.NUM_ELEMENTS, 1)
+                        0, TestNeuralDataset.NUM_CLASSES, (TestNeuralDataset.NUM_ELEMENTS, 1)
                     ).astype(np.int32),
                 )
-        files = glob(os.path.join(TestNeFDatapipe.SAVE_PATH, "*.hdf5"))
+        files = glob(os.path.join(TestNeuralDataset.SAVE_PATH, "*.hdf5"))
         start_end_idxs = [start_end_idx_from_path(path) for path in files]
         start_idx = 0
         end_idx = max([end_idx for _, end_idx in start_end_idxs])
@@ -80,7 +82,7 @@ class TestNeFDatapipe(absltest.TestCase):
         self.path_start_end_iter = path_start_end_list
 
     def test_standard_datapipe(self):
-        datapipe = PreloadedNeFDataset(path=TestNeFDatapipe.SAVE_PATH, data_keys=["params"])
+        datapipe = PreloadedNeFDataset(path=TestNeuralDataset.SAVE_PATH, data_keys=["params"])
         idx = 0
         for data_element in datapipe:
             self.assertIsInstance(data_element, dict)
@@ -92,7 +94,7 @@ class TestNeFDatapipe(absltest.TestCase):
         self.assertGreater(idx, 0)
 
     def test_classification_datapipe(self):
-        datapipe = ClassificationNeFDataset(path=TestNeFDatapipe.SAVE_PATH)
+        datapipe = ClassificationNeFDataset(path=TestNeuralDataset.SAVE_PATH)
         for data_element in datapipe:
             self.assertIsInstance(data_element, dict)
             self.assertIn("params", data_element)
@@ -103,9 +105,9 @@ class TestNeFDatapipe(absltest.TestCase):
             self.assertEqual(data_element["labels"].dtype, np.int32)
 
     def tearDown(self):
-        for path in glob(os.path.join(TestNeFDatapipe.SAVE_PATH, "*.hdf5")):
+        for path in glob(os.path.join(TestNeuralDataset.SAVE_PATH, "*.hdf5")):
             os.remove(path)
-        os.removedirs(TestNeFDatapipe.SAVE_PATH)
+        os.removedirs(TestNeuralDataset.SAVE_PATH)
 
 
 class TestNeFDataLoaders(absltest.TestCase):
@@ -164,7 +166,44 @@ class TestNeFDataLoaders(absltest.TestCase):
         }
         config = ConfigDict(config)
         modes = ["train", "val", "test"]
-        loaders = build_nef_data_loader_group(config, collate_fn=numpy_collate)
+        loaders = [
+            DataLoader(
+                ClassificationNeFDataset(
+                    path=TestNeFDataLoaders.SAVE_PATH,
+                    start_idx=0,
+                    end_idx=40,
+                    split_type="exact",
+                ),
+                batch_size=config.batch_size,
+                num_workers=config.num_workers,
+                collate_fn=numpy_collate,
+                persistent_workers=config.persistent_workers,
+            ),
+            DataLoader(
+                ClassificationNeFDataset(
+                    path=TestNeFDataLoaders.SAVE_PATH,
+                    start_idx=40,
+                    end_idx=60,
+                    split_type="exact",
+                ),
+                batch_size=config.batch_size,
+                num_workers=config.num_workers,
+                collate_fn=numpy_collate,
+                persistent_workers=config.persistent_workers,
+            ),
+            DataLoader(
+                ClassificationNeFDataset(
+                    path=TestNeFDataLoaders.SAVE_PATH,
+                    start_idx=60,
+                    end_idx=80,
+                    split_type="exact",
+                ),
+                batch_size=config.batch_size,
+                num_workers=config.num_workers,
+                collate_fn=numpy_collate,
+                persistent_workers=config.persistent_workers,
+            ),
+        ]
         self.assertEqual(len(loaders), 3)
         for mode, loader in zip(modes, loaders):
             for batch in loader:
@@ -191,7 +230,44 @@ class TestNeFDataLoaders(absltest.TestCase):
             "data_prefix": "",
         }
         config = ConfigDict(config)
-        loaders = build_nef_data_loader_group(config, collate_fn=numpy_collate)
+        loaders = [
+            DataLoader(
+                ClassificationNeFDataset(
+                    path=TestNeFDataLoaders.SAVE_PATH,
+                    start_idx=0,
+                    end_idx=40,
+                    split_type="exact",
+                ),
+                batch_size=config.batch_size,
+                num_workers=config.num_workers,
+                collate_fn=numpy_collate,
+                persistent_workers=config.persistent_workers,
+            ),
+            DataLoader(
+                ClassificationNeFDataset(
+                    path=TestNeFDataLoaders.SAVE_PATH,
+                    start_idx=40,
+                    end_idx=60,
+                    split_type="exact",
+                ),
+                batch_size=config.batch_size,
+                num_workers=config.num_workers,
+                collate_fn=numpy_collate,
+                persistent_workers=config.persistent_workers,
+            ),
+            DataLoader(
+                ClassificationNeFDataset(
+                    path=TestNeFDataLoaders.SAVE_PATH,
+                    start_idx=60,
+                    end_idx=80,
+                    split_type="exact",
+                ),
+                batch_size=config.batch_size,
+                num_workers=config.num_workers,
+                collate_fn=numpy_collate,
+                persistent_workers=config.persistent_workers,
+            ),
+        ]
         self.assertEqual(len(loaders), 3)
         modes = ["train", "val", "test"]
         for mode, loader in zip(modes, loaders):

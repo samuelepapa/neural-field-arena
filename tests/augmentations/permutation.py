@@ -1,15 +1,15 @@
 import numpy as np
 from absl.testing import absltest
 
-from neural_dataset.augmentations import (
+from neural_dataset.transform import (
     RandomFourierNetWeightPermutation,
     RandomMLPWeightPermutation,
 )
-from tests.augmentations.utils import (
+from tests.transformations.utils import (
     allclose_multi_platform,
     create_MFN,
     create_SIREN,
-    test_augmentation,
+    test_transformation,
 )
 
 try:
@@ -27,7 +27,7 @@ except ImportError:
     TORCH_AVAILABLE = False
 
 
-class AugmentationPermutationTest(absltest.TestCase):
+class TransformationPermutationTest(absltest.TestCase):
     def setUp(self):
         num_layers = 4
         hidden_dim = 5
@@ -51,7 +51,7 @@ class AugmentationPermutationTest(absltest.TestCase):
         random_permute = RandomMLPWeightPermutation(
             platform=platform, seed=0, param_keys=param_keys
         )
-        new_datapoint, datapoint, rng = test_augmentation(
+        new_datapoint, datapoint, rng = test_transformation(
             self, random_permute, params, param_keys, platform=platform, num_iter=2, log=False
         )
 
@@ -68,7 +68,7 @@ class AugmentationPermutationTest(absltest.TestCase):
         random_permute = RandomFourierNetWeightPermutation(
             platform=platform, seed=0, param_keys=param_keys
         )
-        new_datapoint, datapoint, rng = test_augmentation(
+        new_datapoint, datapoint, rng = test_transformation(
             self, random_permute, params, param_keys, platform=platform, num_iter=2, log=False
         )
 

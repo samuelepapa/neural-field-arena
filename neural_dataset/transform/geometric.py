@@ -3,10 +3,10 @@ from typing import List, Optional, Tuple, Union
 
 import numpy as np
 
-from neural_dataset.augmentations.core import (
-    Augmentation,
-    IndividualParameterAugmentation,
-    JointParameterAugmentation,
+from neural_dataset.transform.core import (
+    Transform,
+    IndividualParameterTransformation,
+    JointParameterTransformation,
 )
 
 Number = Union[int, float, np.ndarray]
@@ -42,7 +42,7 @@ except ImportError:
 ParameterAny = Union[ParametersList, ParameterVector]
 
 
-class RandomTranslateMFN(JointParameterAugmentation):
+class RandomTranslateMFN(JointParameterTransformation):
     def __init__(
         self,
         *args,
@@ -168,7 +168,7 @@ class RandomTranslateMFN(JointParameterAugmentation):
         return params, rng
 
 
-class RandomTranslateSIREN(JointParameterAugmentation):
+class RandomTranslateSIREN(JointParameterTransformation):
     def __init__(
         self,
         *args,
@@ -266,7 +266,7 @@ class RandomTranslateSIREN(JointParameterAugmentation):
         return params, rng
 
 
-class RandomRotate(IndividualParameterAugmentation):
+class RandomRotate(IndividualParameterTransformation):
     def __init__(
         self,
         *args,
@@ -334,7 +334,7 @@ class RandomRotate(IndividualParameterAugmentation):
         return f"RandomRotate(platform={self.platform}, min_angle={self.min_angle}, max_angle={self.max_angle}{', exclude_params=' + str(self.exclude_params) if self.exclude_params else ''})"
 
 
-class RandomScale(IndividualParameterAugmentation):
+class RandomScale(IndividualParameterTransformation):
     def __init__(self, *args, min_scale: float = 0.5, max_scale: float = 2, **kwargs):
         super().__init__(*args, **kwargs)
         self.min_scale = min_scale

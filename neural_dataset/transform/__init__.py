@@ -1,16 +1,16 @@
-from neural_dataset.augmentations.core import Augmentation, Compose, Identity
-from neural_dataset.augmentations.geometric import (
+from neural_dataset.transform.core import Transform, Compose, Identity
+from neural_dataset.transform.geometric import (
     RandomRotate,
     RandomScale,
     RandomTranslateMFN,
     RandomTranslateSIREN,
 )
-from neural_dataset.augmentations.network import (
+from neural_dataset.transform.network import (
     RandomDropout,
     RandomGaussianNoise,
     RandomQuantileWeightDropout,
 )
-from neural_dataset.augmentations.params import (
+from neural_dataset.transform.params import (
     ListToParameters,
     Normalize,
     ParametersToListMFN,
@@ -18,12 +18,12 @@ from neural_dataset.augmentations.params import (
     ToTensor,
     UnNormalize,
 )
-from neural_dataset.augmentations.permutation import (
+from neural_dataset.transform.permutation import (
     RandomFourierNetWeightPermutation,
     RandomMLPWeightPermutation,
 )
 
-AVAILABLE_AUGMENTATIONS = [
+AVAILABLE_TRANSFORMATIONS = [
     "Identity",
     "Compose",
     # geometric

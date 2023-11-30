@@ -37,10 +37,10 @@ except ImportError:
 ParameterAny = Union[ParametersList, ParameterVector]
 
 
-class Augmentation(ABC):
-    """Abstract base class for augmentations.
+class Transform(ABC):
+    """Abstract base class for transformations.
 
-    Augmentations are thought of as being applied to each sample in the dataset.
+    transformations are thought of as being applied to each sample in the dataset.
     """
 
     @abstractmethod
@@ -48,35 +48,35 @@ class Augmentation(ABC):
         raise NotImplementedError
 
 
-class Compose(Augmentation):
-    """Class for composing augmentations.
+class Compose(Transform):
+    """Class for composing transformations.
 
     Args:
-        augmentations: List of augmentations to compose.
+        transformations: List of transformations to compose.
     """
 
-    def __init__(self, augmentations: List[Augmentation]):
-        self.augmentations = augmentations
+    def __init__(self, transformations: List[Transform]):
+        self.transformations = transformations
 
     def __call__(self, x, rng: Optional[Any] = None):
-        for augmentation in self.augmentations:
-            x, rng = augmentation(x, rng=rng)
+        for transformation in self.transformations:
+            x, rng = transformation(x, rng=rng)
         return x
 
     def __add__(self, composed_aug):
-        return Compose(self.augmentations + composed_aug.augmentations)
+        return Compose(self.transformations + composed_aug.transformations)
 
     def __repr__(self) -> str:
         s = "Compose(\n"
-        for aug in self.augmentations:
+        for aug in self.transformations:
             s += f"{aug}\n"
         s += ")"
 
         return s
 
 
-class Identity(Augmentation):
-    """Identity augmentation."""
+class Identity(Transform):
+    """Identity transformation."""
 
     def __init__(self):
         super().__init__()
@@ -88,8 +88,8 @@ class Identity(Augmentation):
         return "Identity()"
 
 
-class TensorAugmentation(Augmentation, ABC):
-    """Base augmentation class for operations on tensors. Supports numpy, jax, and pytorch.
+class TensorTransformation(Transform, ABC):
+    """Base transformation class for operations on tensors. Supports numpy, jax, and pytorch.
 
     Args:
         platform: Platform to use. Can be "numpy", "jax", "pytorch", or "auto".
@@ -191,7 +191,7 @@ class TensorAugmentation(Augmentation, ABC):
 
     def __repr__(self):
         return (
-            f"TensorAugmentation(platform={self.platform}, seed={self.seed}, device={self.device})"
+            f"TensorTransformation(platform={self.platform}, seed={self.seed}, device={self.device})"
         )
 
     def __str__(self):
@@ -210,8 +210,8 @@ def _replace(data, **kwargs):
     return new_dict
 
 
-class JointParameterAugmentation(TensorAugmentation, ABC):
-    """Base augmentation class for operations on joint parameters, i.e. all parameters being
+class JointParameterTransformation(TensorTransformation, ABC):
+    """Base transformation class for operations on joint parameters, i.e. all parameters being
     augmented together. This is useful when there is dependency between different parameters.
     Supports numpy, jax, and pytorch.
 
@@ -222,7 +222,7 @@ class JointParameterAugmentation(TensorAugmentation, ABC):
             random number generator will be used. If an integer, a new random number
             generator will be created with the given seed. If a random number generator
             is given, it will be used directly.
-        param_keys: List of parameter keys. May not be optional for some augmentations.
+        param_keys: List of parameter keys. May not be optional for some transformations.
     """
 
     def __init__(
@@ -236,7 +236,7 @@ class JointParameterAugmentation(TensorAugmentation, ABC):
         self.param_keys = param_keys
 
     def __call__(self, x: dict, rng: Optional[Any] = None):
-        """Perform augmentation.
+        """Perform transformation.
 
         Args:
             x: Input to augment. If single parameter, the whole parameter will be
@@ -253,11 +253,11 @@ class JointParameterAugmentation(TensorAugmentation, ABC):
         return _replace(x, params=params), rng
 
     def __repr__(self):
-        return f"JointParameterAugmentation(platform={self.platform})"
+        return f"JointParameterTransformation(platform={self.platform})"
 
 
-class IndividualParameterAugmentation(TensorAugmentation, ABC):
-    """Base augmentation class for operations on individual parameters, i.e. each parameter being
+class IndividualParameterTransformation(TensorTransformation, ABC):
+    """Base transformation class for operations on individual parameters, i.e. each parameter being
     augmented independently of each other. Supports numpy, jax, and pytorch.
 
     Args:
@@ -268,7 +268,7 @@ class IndividualParameterAugmentation(TensorAugmentation, ABC):
             generator will be created with the given seed. If a random number generator
             is given, it will be used directly.
         param_keys: List of parameter keys. If None, all parameters will be augmented.
-        exclude_params: List of parameter keys to exclude from augmentation.
+        exclude_params: List of parameter keys to exclude from transformation.
     """
 
     def __init__(
@@ -296,7 +296,7 @@ class IndividualParameterAugmentation(TensorAugmentation, ABC):
         raise NotImplementedError
 
     def __call__(self, x: dict, rng: Optional[Any] = None):
-        """Perform augmentation.
+        """Perform transformation.
 
         Args:
             x: Input to augment. If single parameter, the whole parameter will be
@@ -322,4 +322,4 @@ class IndividualParameterAugmentation(TensorAugmentation, ABC):
         return _replace(x, params=params), rng
 
     def __repr__(self):
-        return f"ParameterAugmentation(platform={self.platform})"
+        return f"ParameterTransformation(platform={self.platform})"

@@ -1,16 +1,16 @@
 from absl.testing import absltest
 
-from neural_dataset.augmentations import (
+from neural_dataset.transform import (
     RandomRotate,
     RandomScale,
     RandomTranslateMFN,
     RandomTranslateSIREN,
 )
-from tests.augmentations.utils import (
+from tests.transformations.utils import (
     allclose_multi_platform,
     create_MFN,
     create_SIREN,
-    test_augmentation,
+    test_transformation,
 )
 
 try:
@@ -28,7 +28,7 @@ except ImportError:
     TORCH_AVAILABLE = False
 
 
-class AugmentationGeometricTest(absltest.TestCase):
+class TransformationGeometricTest(absltest.TestCase):
     def setUp(self):
         num_layers = 4
         hidden_dim = 5
@@ -53,7 +53,7 @@ class AugmentationGeometricTest(absltest.TestCase):
             platform=platform, param_keys=param_keys, min_translation=0, max_translation=0.5
         )
 
-        new_datapoint, datapoint, rng = test_augmentation(
+        new_datapoint, datapoint, rng = test_transformation(
             self, random_translate, params, param_keys, platform=platform, num_iter=1, log=False
         )
 
@@ -68,7 +68,7 @@ class AugmentationGeometricTest(absltest.TestCase):
             platform=platform, param_keys=param_keys, min_translation=0, max_translation=0.5
         )
 
-        new_datapoint, datapoint, rng = test_augmentation(
+        new_datapoint, datapoint, rng = test_transformation(
             self, random_translate, params, param_keys, platform=platform, num_iter=1, log=False
         )
 
@@ -86,13 +86,13 @@ class AugmentationGeometricTest(absltest.TestCase):
             max_angle=3.14,
             selected_param_idxs=selected_param_idxs,
         )
-        new_datapoint, datapoint, _ = test_augmentation(
+        new_datapoint, datapoint, _ = test_transformation(
             self, random_rotation, params, param_keys, platform=platform, num_iter=1, log=False
         )
-        first_datapoint, _, rng = test_augmentation(
+        first_datapoint, _, rng = test_transformation(
             self, random_rotation, params, param_keys, platform=platform, num_iter=1, log=False
         )
-        second_datapoint, _, rng = test_augmentation(
+        second_datapoint, _, rng = test_transformation(
             self,
             random_rotation,
             params,
@@ -137,7 +137,7 @@ class AugmentationGeometricTest(absltest.TestCase):
             selected_param_idxs=selected_param_idxs,
         )
 
-        new_datapoint, datapoint, rng = test_augmentation(
+        new_datapoint, datapoint, rng = test_transformation(
             self, random_translate, params, param_keys, platform=platform, num_iter=1, log=False
         )
 

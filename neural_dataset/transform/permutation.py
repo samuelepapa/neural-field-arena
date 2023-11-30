@@ -3,7 +3,7 @@ from typing import List, Tuple, Union
 
 import numpy as np
 
-from neural_dataset.augmentations.core import JointParameterAugmentation
+from neural_dataset.transform.core import JointParameterTransformation
 
 Number = Union[int, float, np.ndarray]
 
@@ -38,7 +38,7 @@ except ImportError:
 ParameterAny = Union[ParametersList, ParameterVector]
 
 
-class RandomMLPWeightPermutation(JointParameterAugmentation):
+class RandomMLPWeightPermutation(JointParameterTransformation):
     """Randomly permutes the weights of the network without changing the network structure and
     outputs.
 
@@ -114,7 +114,7 @@ class RandomMLPWeightPermutation(JointParameterAugmentation):
         ], rng
 
 
-class RandomFourierNetWeightPermutation(JointParameterAugmentation):
+class RandomFourierNetWeightPermutation(JointParameterTransformation):
     """Randomly permutes the weights of the network without changing the network structure and
     outputs.
 

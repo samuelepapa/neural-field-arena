@@ -88,9 +88,9 @@ def allclose_multi_platform(array_a, array_b, platform="pytorch"):
         raise ValueError(f"Unknown platform {platform}")
 
 
-def test_augmentation(
+def test_transformation(
     testcase: absltest.TestCase,
-    augmentation,
+    transformation,
     params,
     param_keys,
     platform="pytorch",
@@ -114,9 +114,9 @@ def test_augmentation(
 
     # setup the transform function
     if platform == "jax":
-        aug_func = jax.jit(augmentation)
+        aug_func = jax.jit(transformation)
     else:
-        aug_func = augmentation
+        aug_func = transformation
 
     datapoint = {"params": params}
 

@@ -1,12 +1,12 @@
 import numpy as np
 from absl.testing import absltest
 
-from neural_dataset.augmentations import RandomDropout
-from tests.augmentations.utils import (
+from neural_dataset.transform import RandomDropout
+from tests.transformations.utils import (
     allclose_multi_platform,
     create_MFN,
     create_SIREN,
-    test_augmentation,
+    test_transformation,
 )
 
 try:
@@ -24,7 +24,7 @@ except ImportError:
     TORCH_AVAILABLE = False
 
 
-class AugmentationNetworkTest(absltest.TestCase):
+class TransformationNetworkTest(absltest.TestCase):
     def setUp(self):
         num_layers = 4
         hidden_dim = 5
@@ -49,7 +49,7 @@ class AugmentationNetworkTest(absltest.TestCase):
 
         aug = RandomDropout(platform=platform, p=p, param_keys=keys)
 
-        new_datapoint, datapoint, rng = test_augmentation(
+        new_datapoint, datapoint, rng = test_transformation(
             self, aug, params, keys, platform=platform, num_iter=1, log=False
         )
 
@@ -57,7 +57,7 @@ class AugmentationNetworkTest(absltest.TestCase):
         average_zero = 0.0
         sum_items = 0.0
         for i in range(2000):
-            new_datapoint, datapoint, rng = test_augmentation(
+            new_datapoint, datapoint, rng = test_transformation(
                 self, aug, params, keys, platform=platform, num_iter=1, log=False, rng=rng
             )
             local_average = 0.0

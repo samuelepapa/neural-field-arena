@@ -3,10 +3,10 @@ from typing import Any, List, Literal, Tuple, Union
 
 import numpy as np
 
-from neural_dataset.augmentations.core import (
-    Augmentation,
-    JointParameterAugmentation,
-    TensorAugmentation,
+from neural_dataset.transform.core import (
+    Transform,
+    JointParameterTransformation,
+    TensorTransformation,
     _replace,
 )
 
@@ -166,7 +166,7 @@ def get_param_normalization_stats(
     return mean, std
 
 
-class ParametersToListMFN(Augmentation):
+class ParametersToListMFN(Transform):
     """Converts a parameter vector into a list of parameters.
 
     Args:
@@ -254,7 +254,7 @@ class ParametersToListSIREN(ParametersToListMFN):
         return f"ParametersToListSIREN(param_structure={self.param_structure})"
 
 
-class ListToParameters(TensorAugmentation):
+class ListToParameters(TensorTransformation):
     """Converts a parameter list into a parameter vector."""
 
     def __init__(self, *args, **kwargs):
@@ -279,7 +279,7 @@ class ListToParameters(TensorAugmentation):
         )
 
 
-class Normalize(Augmentation):
+class Normalize(Transform):
     """Normalizes the input to have zero mean and unit variance."""
 
     def __init__(self, mean: Number, std: Number, epsilon: float = 1e-6):
@@ -297,7 +297,7 @@ class Normalize(Augmentation):
         return f"Normalize(mean={self.mean}, std={self.std}, epsilon={self.epsilon})"
 
 
-class UnNormalize(Augmentation):
+class UnNormalize(Transform):
     """Un-Normalizes the input to have zero mean and unit variance."""
 
     def __init__(self, mean: Number, std: Number, epsilon: float = 1e-6):
@@ -315,7 +315,7 @@ class UnNormalize(Augmentation):
         return f"UnNormalize(mean={self.mean}, std={self.std}, epsilon={self.epsilon})"
 
 
-class ToTensor(Augmentation):
+class ToTensor(Transform):
     """Converts a numpy array to a torch tensor."""
 
     def __init__(self):

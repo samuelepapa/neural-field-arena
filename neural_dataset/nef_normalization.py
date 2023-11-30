@@ -7,17 +7,18 @@ import torch
 from absl import app, flags, logging
 from ml_collections import ConfigDict
 
-from neural_dataset.augmentations.params import (
+from neural_dataset.transform.params import (
     param_list_to_vector,
     param_vector_to_list,
 )
-from neural_dataset.nef_dataloader import make_dataloader
 from neural_dataset.utils import (
     get_param_keys,
     get_param_structure,
     numpy_collate,
     splits_to_names,
 )
+
+from neural_dataset import PreloadedNeFDataset
 
 FLAGS = flags.FLAGS
 
@@ -57,18 +58,16 @@ def compute_mean_std_for_nef_dataset(
 
     for split in data_split:
         split_end = split_start + split
-        loaders.append(
-            make_dataloader(
-                path,
-                batch_size,
-                seed=seed,
-                shuffle=False,
-                split_start=split_start,
-                split_end=split_end,
-                split_type=split_type,
-                num_workers=num_workers,
-                drop_last=False,
-            )
+        dset = PreloadedNeFDataset(
+            path,
+            start_idx=split_start,
+            end_idx=split_end,
+            split_type=split_type,
+            data_keys=["params"],
+            transform=None,
+        )
+        loader = torch.utils.data.DataLoader(
+            dset, batch_size=batch_size, shuffle=False, num_workers=num_workers
         )
         split_start = split_end
 

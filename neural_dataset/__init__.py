@@ -1,10 +1,5 @@
-from neural_dataset.nef_dataloader import (
-    build_nef_data_loader,
-    build_nef_data_loader_group,
+from neural_dataset.classification_neural_datasets import (
+    ClassificationNeuralCIFAR10,
+    ClassificationNeuralMNIST,
 )
-from neural_dataset.nef_pipe import (
-    CIFAR10NeFDataset,
-    ClassificationNeFDataset,
-    MNISTNeFDataset,
-    PreloadedNeFDataset,
-)
+from neural_dataset.core import PreloadedNeFDataset

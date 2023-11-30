@@ -9,9 +9,9 @@ Creators: [Samuele Papa](https://samuelepapa.github.io), [Riccardo Valperga](htt
 
 We provide a simple interface to load the neural datasets from the **Neural Field Arena**.
 
-*Augmentations* are also implemented in Jax, Pytorch and Numpy. They allow for geometric and network transformations, as well as permutation to be applied to the neural fields.
+*Transformations* are also implemented in Jax, Pytorch and Numpy. They allow for geometric and network transformations, as well as permutation to be applied to the neural fields.
 
-The neural fields have been stored in an efficient vectorized format, to allow for quick read and compact storage. The conversion from vectorized to list format, which most of the literature uses, is very straightforward and a specific transform is provided as part of the augmentation package.
+The neural fields have been stored in an efficient vectorized format, to allow for quick read and compact storage. The conversion from vectorized to list format, which most of the literature uses, is very straightforward and a specific transform is provided as part of the transformation package.
 
 Soon this library will be available on PyPI. The datasets will also available soon on Zenodo, and they will be downloaded automatically when a dataset is selected.
 

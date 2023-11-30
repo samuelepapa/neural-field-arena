@@ -2,10 +2,10 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 
 import numpy as np
 
-from neural_dataset.augmentations.core import (
-    Augmentation,
-    IndividualParameterAugmentation,
-    JointParameterAugmentation,
+from neural_dataset.transform.core import (
+    Transform,
+    IndividualParameterTransformation,
+    JointParameterTransformation,
 )
 
 Number = Union[int, float, np.ndarray]
@@ -41,7 +41,7 @@ except ImportError:
 ParameterAny = Union[ParametersList, ParameterVector]
 
 
-class RandomQuantileWeightDropout(JointParameterAugmentation):
+class RandomQuantileWeightDropout(JointParameterTransformation):
     """Randomly masks out weights of the network below a certain quantile. The quantile is
     uniformly sampled between min_quantile and max_quantile.
 
@@ -52,7 +52,7 @@ class RandomQuantileWeightDropout(JointParameterAugmentation):
             random number generator will be used. If an integer, a new random number
             generator will be created with the given seed. If a random number generator
             is given, it will be used directly.
-        param_keys: List of parameter keys. Optional, not needed for this augmentation.
+        param_keys: List of parameter keys. Optional, not needed for this transformation.
         min_quantile: Minimum quantile to use when sampling to quantile to use to mask out weights.
         max_quantile: Maximum quantile to use when sampling to quantile to use to mask out weights.
     """
@@ -103,7 +103,7 @@ class RandomQuantileWeightDropout(JointParameterAugmentation):
         return [t * (torch.abs(t) >= threshold) for t in x], rng
 
 
-class RandomDropout(IndividualParameterAugmentation):
+class RandomDropout(IndividualParameterTransformation):
     """Randomly sets parameters to zero.
 
     Args:
@@ -114,7 +114,7 @@ class RandomDropout(IndividualParameterAugmentation):
             generator will be created with the given seed. If a random number generator
             is given, it will be used directly.
         param_keys: List of parameter keys. If None, all parameters will be augmented.
-        exclude_params: List of parameter keys to exclude from augmentation.
+        exclude_params: List of parameter keys to exclude from transformation.
         p: Probability of setting a parameter to zero. Can be a float or a dictionary
             mapping parameter keys to probabilities.
     """
@@ -168,7 +168,7 @@ class RandomDropout(IndividualParameterAugmentation):
         return f"RandomDropout(platform={self.platform}, p={self.p}{', exclude_params=' + str(self.exclude_params) if self.exclude_params else ''})"
 
 
-class RandomGaussianNoise(IndividualParameterAugmentation):
+class RandomGaussianNoise(IndividualParameterTransformation):
     """Adds Gaussian noise to parameters.
 
     Args:
@@ -179,7 +179,7 @@ class RandomGaussianNoise(IndividualParameterAugmentation):
             generator will be created with the given seed. If a random number generator
             is given, it will be used directly.
         param_keys: List of parameter keys. If None, all parameters will be augmented.
-        exclude_params: List of parameter keys to exclude from augmentation.
+        exclude_params: List of parameter keys to exclude from transformation.
         sigma: Standard deviation of the Gaussian noise. Can be a float or a dictionary
             mapping parameter keys to standard deviations.
     """

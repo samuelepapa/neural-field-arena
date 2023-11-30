@@ -86,51 +86,65 @@ def load_data_from_hdf5(
 
 class PreloadedNeFDataset(torch.utils.data.Dataset):
     def __init__(
-        self,
-        path: Union[str, Path],
-        start_idx: Union[int, float] = 0.0,
-        end_idx: Union[int, float] = 1.0,
-        split_type: Literal["fractional", "exact", None] = None,
-        data_prefix: str = "",
-        data_keys: List[str] = None,
-        transform: Optional[Union[Callable, Dict[str, Callable]]] = None,
-    ):
-        if isinstance(path, str):
-            path = Path(path)
-        assert path.exists(), f"Path {path.absolute()} does not exist"
-        assert path.is_dir(), f"Path {path.absolute()} is not a directory"
+            self,
+            path: Union[str, Path],
+            start_idx: Union[int, float] = 0.0,
+            end_idx: Union[int, float] = 1.0,
+            split_type: Literal["fractional", "exact", None] = None,
+            data_prefix: str = "",
+            data_keys: List[str] = None,
+            transform: Optional[Union[Callable, Dict[str, Callable]]] = None,
+        ):
+            """
+            Initialize the NeuralDataset object.
 
-        file_pattern = f"{data_prefix}*.hdf5"
-        paths = list(path.glob(f"{data_prefix}*.hdf5"))
+            Args:
+                path (Union[str, Path]): The path to the directory containing the dataset files.
+                start_idx (Union[int, float], optional): The starting index or fraction of the dataset to use. Defaults to 0.0.
+                end_idx (Union[int, float], optional): The ending index or fraction of the dataset to use. Defaults to 1.0.
+                split_type (Literal["fractional", "exact", None], optional): The type of data split to perform. 
+                    Can be "fractional" for fractional split, "exact" for exact split, or None to infer the split type from start_idx and end_idx. Defaults to None.
+                data_prefix (str, optional): The prefix of the dataset files. Defaults to "".
+                data_keys (List[str], optional): The list of keys to load from the dataset files. Defaults to None, which loads all keys.
+                transform (Optional[Union[Callable, Dict[str, Callable]]], optional): The transformation function to apply to the loaded data. 
+                    Defaults to None.
+            """
+            if isinstance(path, str):
+                path = Path(path)
+            assert path.exists(), f"Path {path.absolute()} does not exist"
+            assert path.is_dir(), f"Path {path.absolute()} is not a directory"
 
-        if len(paths) == 0:
-            raise ValueError(
-                f"No files found at `{path.absolute()}` with pattern `{file_pattern}`"
-            )
+            file_pattern = f"{data_prefix}*.hdf5"
+            paths = list(path.glob(f"{data_prefix}*.hdf5"))
 
-        # Determine data split
-        if split_type is None:
-            if isinstance(start_idx, float) and isinstance(end_idx, float):
-                split_type = "fractional"
-            elif isinstance(start_idx, int) and isinstance(end_idx, int):
-                split_type = "exact"
-            else:
+            if len(paths) == 0:
                 raise ValueError(
-                    f"Split type could not be inferred from start_idx={start_idx} and end_idx={end_idx}"
+                    f"No files found at `{path.absolute()}` with pattern `{file_pattern}`"
                 )
-        if split_type == "fractional":
-            num_elements = get_dataset_size(paths)
-            start_idx = int(start_idx * num_elements)
-            end_idx = int(end_idx * num_elements)
-        elif split_type == "exact":
-            start_idx = int(start_idx)
-            end_idx = int(end_idx)
 
-        self.data = load_data_from_hdf5(paths, data_keys, start_idx, end_idx)
-        self.data_keys = data_keys if data_keys is not None else list(self.data.keys())
-        self.path = path
-        self.param_structure = get_param_structure(path)
-        self.transform = transform
+            # Determine data split
+            if split_type is None:
+                if isinstance(start_idx, float) and isinstance(end_idx, float):
+                    split_type = "fractional"
+                elif isinstance(start_idx, int) and isinstance(end_idx, int):
+                    split_type = "exact"
+                else:
+                    raise ValueError(
+                        f"Split type could not be inferred from start_idx={start_idx} and end_idx={end_idx}"
+                    )
+            if split_type == "fractional":
+                num_elements = get_dataset_size(paths)
+                start_idx = int(start_idx * num_elements)
+                end_idx = int(end_idx * num_elements)
+            elif split_type == "exact":
+                start_idx = int(start_idx)
+                end_idx = int(end_idx)
+
+            self.data = load_data_from_hdf5(paths, data_keys, start_idx, end_idx)
+            self.data_keys = data_keys if data_keys is not None else list(self.data.keys())
+            self.path = path
+            self.param_structure = get_param_structure(path)
+            self.transform = transform
 
     def __len__(self):
         return self.data[self.data_keys[0]].shape[0]
@@ -161,44 +175,3 @@ class ClassificationNeFDataset(PreloadedNeFDataset):
             data_keys=["params", "labels"],
             transform=transform,
         )
-
-
-class MNISTNeFDataset(PreloadedNeFDataset):
-    def __init__(
-        self, path: Union[str, Path], split: Literal["train", "val", "test"] = "train", **kwargs
-    ):
-        if split == "train":
-            start_idx = 0
-            end_idx = 55000
-        elif split == "val":
-            start_idx = 55000
-            end_idx = 60000
-        elif split == "test":
-            start_idx = 60000
-            end_idx = 70000
-        else:
-            raise ValueError(f"Split {split} not supported, must be one of `train`, `val`, `test`")
-
-        super().__init__(path, start_idx, end_idx, split_type="exact", **kwargs)
-
-
-class CIFAR10NeFDataset(PreloadedNeFDataset):
-    def __init__(
-        self,
-        path: Union[str, Path],
-        split: Literal["train", "val", "test"] = "train",
-        **kwargs,
-    ):
-        if split == "train":
-            start_idx = 0
-            end_idx = 45000
-        elif split == "val":
-            start_idx = 45000
-            end_idx = 50000
-        elif split == "test":
-            start_idx = 50000
-            end_idx = 60000
-        else:
-            raise ValueError(f"Split {split} not supported, must be one of `train`, `val`, `test`")
-
-        super().__init__(path, start_idx, end_idx, split_type="exact", **kwargs)

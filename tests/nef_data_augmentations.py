@@ -6,7 +6,7 @@ import numpy as np
 import torch
 from absl.testing import absltest
 
-from neural_dataset.augmentations import (
+from neural_dataset.transform import (
     ParametersToList,
     RandomDropout,
     RandomGaussianNoise,
@@ -27,9 +27,9 @@ class TestParametersToList(absltest.TestCase):
             ("fc3.weight", (64, 10)),
             ("fc3.bias", (10,)),
         ]
-        self.augmentation = ParametersToList(param_structure=network)
+        self.transformation = ParametersToList(param_structure=network)
         inp = np.random.normal(size=(sum([np.prod(p[1]) for p in network]),))
-        out = self.augmentation(inp)
+        out = self.transformation(inp)
         self.assertTrue(isinstance(out, (list, tuple)))
         self.assertEqual(len(out), len(network))
         for i, (_, shape) in enumerate(network):
