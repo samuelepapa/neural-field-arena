@@ -145,7 +145,7 @@ class TestNeFDataLoaders(absltest.TestCase):
                     )
                     dt = h5py.special_dtype(vlen=str)
                     data = f.create_dataset("param_config", (1,), dtype=dt)
-                    data[0] = json.dumps(("layer1", (TestNeFDatapipe.HIDDEN_DIM,)))
+                    data[0] = json.dumps(("layer1", (TestNeFDataLoaders.HIDDEN_DIM,)))
                     labels = idx * TestNeFDataLoaders.NUM_ELEMENTS + np.arange(
                         TestNeFDataLoaders.NUM_ELEMENTS
                     ).astype(np.int32)
