@@ -3,12 +3,8 @@ import os
 from glob import glob
 
 import h5py
-import jax
-import jax.numpy as jnp
 import numpy as np
 from absl.testing import absltest
-from flax.core.frozen_dict import FrozenDict
-from ml_collections import ConfigDict
 from torch.utils.data import DataLoader
 
 from neural_dataset import (
@@ -163,7 +159,6 @@ class TestNeFDataLoaders(absltest.TestCase):
             "split": [40, 20, 20],
             "data_prefix": "",
         }
-        config = ConfigDict(config)
         modes = ["train", "val", "test"]
         loaders = [
             DataLoader(
@@ -173,10 +168,10 @@ class TestNeFDataLoaders(absltest.TestCase):
                     end_idx=40,
                     split_type="exact",
                 ),
-                batch_size=config.batch_size,
-                num_workers=config.num_workers,
+                batch_size=config["batch_size"],
+                num_workers=config["num_workers"],
                 collate_fn=numpy_collate,
-                persistent_workers=config.persistent_workers,
+                persistent_workers=config["persistent_workers"],
             ),
             DataLoader(
                 ClassificationNeFDataset(
@@ -185,10 +180,10 @@ class TestNeFDataLoaders(absltest.TestCase):
                     end_idx=60,
                     split_type="exact",
                 ),
-                batch_size=config.batch_size,
-                num_workers=config.num_workers,
+                batch_size=config["batch_size"],
+                num_workers=config["num_workers"],
                 collate_fn=numpy_collate,
-                persistent_workers=config.persistent_workers,
+                persistent_workers=config["persistent_workers"],
             ),
             DataLoader(
                 ClassificationNeFDataset(
@@ -197,10 +192,10 @@ class TestNeFDataLoaders(absltest.TestCase):
                     end_idx=80,
                     split_type="exact",
                 ),
-                batch_size=config.batch_size,
-                num_workers=config.num_workers,
+                batch_size=config["batch_size"],
+                num_workers=config["num_workers"],
                 collate_fn=numpy_collate,
-                persistent_workers=config.persistent_workers,
+                persistent_workers=config["persistent_workers"],
             ),
         ]
         self.assertEqual(len(loaders), 3)
@@ -228,7 +223,6 @@ class TestNeFDataLoaders(absltest.TestCase):
             "split": [40, 20, 20],
             "data_prefix": "",
         }
-        config = ConfigDict(config)
         loaders = [
             DataLoader(
                 ClassificationNeFDataset(
@@ -237,10 +231,10 @@ class TestNeFDataLoaders(absltest.TestCase):
                     end_idx=40,
                     split_type="exact",
                 ),
-                batch_size=config.batch_size,
-                num_workers=config.num_workers,
+                batch_size=config["batch_size"],
+                num_workers=config["num_workers"],
                 collate_fn=numpy_collate,
-                persistent_workers=config.persistent_workers,
+                persistent_workers=config["persistent_workers"],
             ),
             DataLoader(
                 ClassificationNeFDataset(
@@ -249,10 +243,10 @@ class TestNeFDataLoaders(absltest.TestCase):
                     end_idx=60,
                     split_type="exact",
                 ),
-                batch_size=config.batch_size,
-                num_workers=config.num_workers,
+                batch_size=config["batch_size"],
+                num_workers=config["num_workers"],
                 collate_fn=numpy_collate,
-                persistent_workers=config.persistent_workers,
+                persistent_workers=config["persistent_workers"],
             ),
             DataLoader(
                 ClassificationNeFDataset(
@@ -261,10 +255,10 @@ class TestNeFDataLoaders(absltest.TestCase):
                     end_idx=80,
                     split_type="exact",
                 ),
-                batch_size=config.batch_size,
-                num_workers=config.num_workers,
+                batch_size=config["batch_size"],
+                num_workers=config["num_workers"],
                 collate_fn=numpy_collate,
-                persistent_workers=config.persistent_workers,
+                persistent_workers=config["persistent_workers"],
             ),
         ]
         self.assertEqual(len(loaders), 3)

@@ -5,7 +5,6 @@ from typing import List, Tuple, Union
 import numpy as np
 import torch
 from absl import app, flags, logging
-from ml_collections import ConfigDict
 
 from neural_dataset import PreloadedNeFDataset
 from neural_dataset.transform.params import param_list_to_vector, param_vector_to_list
