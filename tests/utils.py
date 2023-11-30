@@ -11,4 +11,3 @@ def dict_equal(d1, d2, equal_fn):
         return True
     else:
         return equal_fn(d1, d2)
-

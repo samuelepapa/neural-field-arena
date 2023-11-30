@@ -4,9 +4,9 @@ from typing import List, Optional, Tuple, Union
 import numpy as np
 
 from neural_dataset.transform.core import (
-    Transform,
     IndividualParameterTransformation,
     JointParameterTransformation,
+    Transform,
 )
 
 Number = Union[int, float, np.ndarray]

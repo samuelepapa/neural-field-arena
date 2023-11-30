@@ -1,4 +1,4 @@
-from neural_dataset.transform.core import Transform, Compose, Identity
+from neural_dataset.transform.core import Compose, Identity, Transform
 from neural_dataset.transform.geometric import (
     RandomRotate,
     RandomScale,

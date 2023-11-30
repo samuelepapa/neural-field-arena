@@ -12,11 +12,6 @@ import torch.utils.data as data
 from absl import logging
 from ml_collections import ConfigDict
 
-from pathlib import Path
-from typing import Any, Callable, Sequence, Tuple, Union
-
-from absl import logging
-
 from neural_dataset import transform
 
 
@@ -89,6 +84,7 @@ def create_path_start_end_list(path_start_end_idxs, start_idx, end_idx):
             )
 
     return used_files
+
 
 def start_end_idx_from_path(path: str) -> Tuple[int, int]:
     """Get start and end index from path.

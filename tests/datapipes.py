@@ -9,6 +9,7 @@ import numpy as np
 from absl.testing import absltest
 from flax.core.frozen_dict import FrozenDict
 from ml_collections import ConfigDict
+from torch.utils.data import DataLoader
 
 from neural_dataset import (
     ClassificationNeFDataset,
@@ -16,8 +17,6 @@ from neural_dataset import (
     build_nef_data_loader_group,
 )
 from neural_dataset.utils import numpy_collate, start_end_idx_from_path
-
-from torch.utils.data import DataLoader
 
 
 class TestNeuralDataset(absltest.TestCase):

@@ -1,8 +1,8 @@
-from typing import List, Tuple, Union, Literal
-
 from pathlib import Path
+from typing import List, Literal, Tuple, Union
 
 from neural_dataset.core import ClassificationNeFDataset
+
 
 class ClassificationNeuralMNIST(ClassificationNeFDataset):
     def __init__(
@@ -43,6 +43,7 @@ class ClassificationNeuralCIFAR10(ClassificationNeFDataset):
             raise ValueError(f"Split {split} not supported, must be one of `train`, `val`, `test`")
 
         super().__init__(path, start_idx, end_idx, split_type="exact", **kwargs)
+
 
 class ClassificationNeuralShapeNet(ClassificationNeFDataset):
     def __init__(

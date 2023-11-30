@@ -35,4 +35,4 @@ We thank Miltiadis Kofina, and David Romero for the feedback during development.
 
 ## Contact
 
-[Samuele Papa](http://samuelepapa.github.io) - [Riccardo Valperga](https://twitter.com/RValperga) - [Phillip Lippe]() - [David Knigge]()
+[Samuele Papa](http://samuelepapa.github.io) - [Riccardo Valperga](https://twitter.com/RValperga) - [Phillip Lippe](<>) - [David Knigge](<>)

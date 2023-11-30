@@ -4,9 +4,9 @@ from typing import Any, List, Literal, Tuple, Union
 import numpy as np
 
 from neural_dataset.transform.core import (
-    Transform,
     JointParameterTransformation,
     TensorTransformation,
+    Transform,
     _replace,
 )
 

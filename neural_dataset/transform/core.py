@@ -190,9 +190,7 @@ class TensorTransformation(Transform, ABC):
         return self.transform(y, rng=rng)
 
     def __repr__(self):
-        return (
-            f"TensorTransformation(platform={self.platform}, seed={self.seed}, device={self.device})"
-        )
+        return f"TensorTransformation(platform={self.platform}, seed={self.seed}, device={self.device})"
 
     def __str__(self):
         return repr(self)

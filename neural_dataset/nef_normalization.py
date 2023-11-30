@@ -7,18 +7,14 @@ import torch
 from absl import app, flags, logging
 from ml_collections import ConfigDict
 
-from neural_dataset.transform.params import (
-    param_list_to_vector,
-    param_vector_to_list,
-)
+from neural_dataset import PreloadedNeFDataset
+from neural_dataset.transform.params import param_list_to_vector, param_vector_to_list
 from neural_dataset.utils import (
     get_param_keys,
     get_param_structure,
     numpy_collate,
     splits_to_names,
 )
-
-from neural_dataset import PreloadedNeFDataset
 
 FLAGS = flags.FLAGS
 
