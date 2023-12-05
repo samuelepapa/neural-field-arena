@@ -9,11 +9,11 @@ from ml_collections import ConfigDict
 
 from neural_dataset import (
     ClassificationNeuralCIFAR10,
+    ClassificationNeuralMicroImageNet,
     ClassificationNeuralMNIST,
     ClassificationNeuralShapeNet,
-    ClassificationNeuralMicroImageNet,
-    compute_mean_std_for_nef_dataset,
     Normalize,
+    compute_mean_std_for_nef_dataset,
 )
 from neural_dataset.classification_neural_datasets import get_mean_std
 from neural_dataset.utils import torch_collate
@@ -33,7 +33,6 @@ flags.DEFINE_integer("num_epochs", 10, "number of epochs")
 flags.DEFINE_integer("seed", 42, "seed for training")
 
 flags.DEFINE_string("backend", "torch", "backend for dataset")
-
 
 
 class MLPClassifier(torch.nn.Module):
@@ -58,6 +57,7 @@ class MLPClassifier(torch.nn.Module):
     def forward(self, x: torch.Tensor):
         return self.seq(x)
 
+
 def flags_to_config_dict() -> ConfigDict:
     config = ConfigDict()
     for k, v in FLAGS.flag_values_dict().items():
@@ -72,6 +72,7 @@ def flags_to_config_dict() -> ConfigDict:
         else:
             config[k] = v
     return config
+
 
 def train_torch_classifier_on_nef(_):
     config = flags_to_config_dict()
@@ -94,7 +95,7 @@ def train_torch_classifier_on_nef(_):
     except ValueError:
         metadata = compute_mean_std_for_nef_dataset(
             data_config.path,
-            [end-start for (start, end) in dset_class.splits.values()],
+            [end - start for (start, end) in dset_class.splits.values()],
             split_names=["train", "val", "test"],
             seed=data_config.seed,
             batch_size=data_config.batch_size,
@@ -182,6 +183,7 @@ def train_torch_classifier_on_nef(_):
             logging.info(f"[Epoch {epoch}|{num_epochs}] val acc: {val_acc:.2%}")
 
     return 0
+
 
 if __name__ == "__main__":
     app.run(train_torch_classifier_on_nef)

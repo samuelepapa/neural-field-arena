@@ -62,9 +62,11 @@ def compute_mean_std_for_nef_dataset(
             data_keys=["params"],
             transform=None,
         )
-        loaders.append(torch.utils.data.DataLoader(
-            dset, batch_size=batch_size, shuffle=False, num_workers=num_workers
-        ))
+        loaders.append(
+            torch.utils.data.DataLoader(
+                dset, batch_size=batch_size, shuffle=False, num_workers=num_workers
+            )
+        )
         split_start = split_end
 
     all_split_names = splits_to_names(data_split)
@@ -138,7 +140,7 @@ def compute_mean_std_for_nef_dataset(
                     mean_squares[visual_split_name][param_key].append(np.mean(param**2))
                     sizes[visual_split_name][param_key].append(param.shape[0])
             else:
-                means[split_visual_split_namename].append(np.mean(nef_params, axis=(0,)))
+                means[visual_split_name].append(np.mean(nef_params, axis=(0,)))
                 mean_squares[visual_split_name].append(np.mean(nef_params**2, axis=(0,)))
                 sizes[visual_split_name].append(nef_params.shape[0])
 
@@ -152,7 +154,10 @@ def compute_mean_std_for_nef_dataset(
             for param_key, param_shape in param_structure:
                 mean = np.full(
                     param_shape,
-                    np.average(means[visual_split_name][param_key], weights=sizes[visual_split_name][param_key]),
+                    np.average(
+                        means[visual_split_name][param_key],
+                        weights=sizes[visual_split_name][param_key],
+                    ),
                 )
                 std = np.full(
                     param_shape,
@@ -177,7 +182,9 @@ def compute_mean_std_for_nef_dataset(
                 means[visual_split_name], axis=0, weights=sizes[visual_split_name]
             )
             full_stds[visual_split_name] = np.sqrt(
-                np.average(mean_squares[visual_split_name], axis=0, weights=sizes[visual_split_name])
+                np.average(
+                    mean_squares[visual_split_name], axis=0, weights=sizes[visual_split_name]
+                )
                 - full_means[visual_split_name] ** 2
             )
 

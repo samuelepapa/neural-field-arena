@@ -37,7 +37,8 @@ def numpy_collate(batch: Union[np.ndarray, Sequence[Any], Any]):
         return {key: numpy_collate([d[key] for d in batch]) for key in batch[0]}
     else:
         return np.array(batch)
-    
+
+
 def torch_collate(batch: Union[np.ndarray, Sequence[Any], Any]):
     """Collate function for numpy arrays.
 
