@@ -44,7 +44,7 @@ class Transform(ABC):
     """
 
     @abstractmethod
-    def __call__(self, x):
+    def __call__(self, x, rng: Optional[Any] = None):
         raise NotImplementedError
 
 
@@ -61,7 +61,7 @@ class Compose(Transform):
     def __call__(self, x, rng: Optional[Any] = None):
         for transformation in self.transformations:
             x, rng = transformation(x, rng=rng)
-        return x
+        return x, rng
 
     def __add__(self, composed_aug):
         return Compose(self.transformations + composed_aug.transformations)

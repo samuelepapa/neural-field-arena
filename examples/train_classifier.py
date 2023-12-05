@@ -12,16 +12,23 @@ from neural_dataset import (
     ClassificationNeuralMicroImageNet,
     ClassificationNeuralMNIST,
     ClassificationNeuralShapeNet,
+    Compose,
+    ListToParameters,
     Normalize,
+    ParametersToList,
+    RandomGaussianNoise,
     compute_mean_std_for_nef_dataset,
 )
-from neural_dataset.classification_neural_datasets import get_mean_std
-from neural_dataset.utils import torch_collate
+from neural_dataset.classification_neural_datasets import (
+    get_mean_std,
+    get_param_keys,
+    get_param_structure,
+)
 
 # set config flags
 flags.DEFINE_string("dataset.path", "saved_models/MNIST/SIREN", "path to dataset")
 flags.DEFINE_integer("dataset.batch_size", 128, "batch size")
-flags.DEFINE_integer("dataset.num_workers", 0, "number of workers")
+flags.DEFINE_integer("dataset.num_workers", 8, "number of workers")
 flags.DEFINE_integer("dataset.seed", 42, "seed for dataset")
 flags.DEFINE_integer("dataset.num_classes", 10, "number of classes")
 
@@ -102,12 +109,21 @@ def train_torch_classifier_on_nef(_):
             num_workers=data_config.num_workers,
         )
         mean, std = np.array(metadata["train"]["mean"]), np.array(metadata["train"]["std"])
-
-    transform = Normalize(mean, std)
+    param_keys = get_param_keys(data_config.path)
+    param_structure = get_param_structure(data_config.path)
+    transform = Compose(
+        (
+            Normalize(mean, std),
+            ParametersToList(param_structure=param_structure),
+            RandomGaussianNoise(sigma=0.05, param_keys=param_keys),
+            ListToParameters(),
+        )
+    )
+    val_transform = Normalize(mean, std)
 
     train_dataset = dset_class(data_config.path, split="train", transform=transform)
-    val_dataset = dset_class(data_config.path, split="val", transform=transform)
-    test_dataset = dset_class(data_config.path, split="test", transform=transform)
+    val_dataset = dset_class(data_config.path, split="val", transform=val_transform)
+    test_dataset = dset_class(data_config.path, split="test", transform=val_transform)
     data_loaders = [
         torch.utils.data.DataLoader(
             train_dataset,
@@ -168,6 +184,7 @@ def train_torch_classifier_on_nef(_):
             model.eval()
             count = 0
             acc = 0
+            cum_loss = 0
             for batch in val_loader:
                 nef_weights, labels = batch["params"], batch["labels"]
                 nef_weights = nef_weights.to("cuda").float()
@@ -177,10 +194,14 @@ def train_torch_classifier_on_nef(_):
                 batch_size = labels.shape[0]
                 accuracy = (output.argmax(dim=-1) == labels).float().mean().item()
                 acc += accuracy * batch_size
+                cum_loss += loss.item() * batch_size
                 count += batch_size
             val_acc = acc / count
+            val_loss = cum_loss / count
 
-            logging.info(f"[Epoch {epoch}|{num_epochs}] val acc: {val_acc:.2%}")
+            logging.info(
+                f"[Epoch {epoch}|{num_epochs}] val acc: {val_acc:.2%} val_loss: {val_loss:.3f}"
+            )
 
     return 0
 

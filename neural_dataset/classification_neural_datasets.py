@@ -2,6 +2,7 @@ import json
 from pathlib import Path
 from typing import Callable, Dict, List, Literal, Optional, Tuple, Union
 
+import h5py
 import numpy as np
 from absl import logging
 
@@ -21,6 +22,24 @@ def get_mean_std(path, split_name):
         raise ValueError(f"Split {split_name} not found in metadata.json")
 
     return np.array(metadata[split_name]["mean"]), np.array(metadata[split_name]["std"])
+
+
+def get_param_keys(path: Union[str, Path]) -> List[str]:
+    first_h5py_file = list(Path(path).glob("*.hdf5"))[0]
+    with h5py.File(first_h5py_file, "r") as f:
+        # get the param keys from binary
+        param_keys = [x[0] for x in json.loads(f["param_config"][0])]
+
+    return param_keys
+
+
+def get_param_structure(path: Union[str, Path]) -> List[str]:
+    first_h5py_file = list(Path(path).glob("*.hdf5"))[0]
+    with h5py.File(first_h5py_file, "r") as f:
+        # get the param keys from binary
+        param_structure = json.loads(f["param_config"][0])
+
+    return param_structure
 
 
 class ClassificationNeuralMNIST(ClassificationNeFDataset):

@@ -166,7 +166,7 @@ def get_param_normalization_stats(
     return mean, std
 
 
-class ParametersToListMFN(Transform):
+class ParametersToList(Transform):
     """Converts a parameter vector into a list of parameters.
 
     Args:
@@ -176,39 +176,17 @@ class ParametersToListMFN(Transform):
 
     def __init__(self, param_structure: List[Tuple[str, Tuple[int]]]):
         super().__init__()
-        assert (
-            len(param_structure) % 4 == 0
-        ), f"There should be an even number of layers, but there are {len(param_structure)}"
-
-        self.original_param_structure = param_structure
-
-        num_layers = len(param_structure) // 4
-        self.param_structure_idxs = [
-            index_sorting_layers_MFN(x[0], num_layers) for x in param_structure
-        ]
-        self.param_structure = []
-        for original_idx, param_structure_idx in enumerate(self.param_structure_idxs):
-            prev_lengths = [np.prod(x[1]) for x in param_structure[:original_idx]]
-            start_idx = sum(prev_lengths)
-            end_idx = start_idx + np.prod(param_structure[original_idx][1])
-            new_local_info = (
-                param_structure[param_structure_idx][0],
-                param_structure[param_structure_idx][1],
-                (start_idx, end_idx),
-            )
-            self.param_structure.append(new_local_info)
-
-        self.param_keys = [x[0] for x in self.param_structure]
+        self.param_structure = param_structure
 
     def transform(self, x):
-        return param_vector_to_list_relativistic(x, self.param_structure)
+        return param_vector_to_list(x, self.param_structure)
 
-    def __call__(self, x: dict):
+    def __call__(self, x: dict, rng: Any = None):
         params = x["params"]
-        return _replace(x, params=self.transform(params))
+        return _replace(x, params=self.transform(params)), rng
 
     def __repr__(self):
-        return f"ParametersToListMFN(param_structure={self.param_structure})"
+        return f"ParametersToList(param_structure={self.param_structure})"
 
 
 def index_sorting_layers_SIREN(param_name, num_layers):
@@ -226,7 +204,7 @@ def index_sorting_layers_SIREN(param_name, num_layers):
         raise ValueError(f"param_name (`{param_name}`) must end with either `.bias` or `.kernel`.")
 
 
-class ParametersToListSIREN(ParametersToListMFN):
+class ParametersToListSIREN(ParametersToList):
     """Converts a parameter vector into a list of parameters.
 
     Args:
@@ -269,9 +247,9 @@ class ListToParameters(TensorTransformation):
     def jax_transform(self, params: ParametersList) -> ParameterVector:
         return jnp.concatenate([x.flatten() for x in params], axis=0).flatten()
 
-    def __call__(self, x: dict) -> dict:
+    def __call__(self, x: dict, rng) -> dict:
         params = deepcopy(x["params"])
-        return _replace(x, params=self.transform(params))
+        return _replace(x, params=self.transform(params)), rng
 
     def __repr__(self):
         return (

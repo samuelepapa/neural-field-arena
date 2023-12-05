@@ -13,7 +13,7 @@ from neural_dataset.transform.network import (
 from neural_dataset.transform.params import (
     ListToParameters,
     Normalize,
-    ParametersToListMFN,
+    ParametersToList,
     ParametersToListSIREN,
     ToTensor,
     UnNormalize,
@@ -32,7 +32,7 @@ AVAILABLE_TRANSFORMATIONS = [
     "RandomRotate",
     "RandomScale",
     # params
-    "ParametersToListMFN",
+    "ParametersToList",
     "ParametersToListSIREN",
     "ListToParameters",
     "Normalize",

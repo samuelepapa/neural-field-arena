@@ -12,7 +12,7 @@ from neural_dataset.transform import (
     Identity,
     ListToParameters,
     Normalize,
-    ParametersToListMFN,
+    ParametersToList,
     ParametersToListSIREN,
     RandomFourierNetWeightPermutation,
     RandomGaussianNoise,

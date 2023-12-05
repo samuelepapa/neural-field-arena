@@ -49,35 +49,44 @@ def load_data_from_hdf5(
     if end_idx is None:
         end_idx = get_dataset_size(hdf5_files)
     data = {}
-    idx = start_idx
+    idx = 0
     dataset_size = end_idx - start_idx
     for file in sorted(hdf5_files, key=lambda x: int(Path(x).stem.split("_")[1].split("-")[0])):
-        elements_in_file, elements_to_load = -1, -1
-        with h5py.File(file, "r") as f:
-            for key in data_keys:
-                assert key in f.keys(), f"Key {key} not found in {file}"
-                if key not in data:
-                    target_shape = (end_idx - start_idx, *f[key].shape[1:])
-                    data[key] = np.zeros(target_shape, dtype=f[key].dtype)
-                if elements_in_file == -1:
-                    elements_in_file = f[key].shape[0]
-                    file_start_idx = max(0, start_idx - idx)
-                    file_end_idx = min(elements_in_file, end_idx - idx)
-                    elements_to_load = max(0, file_end_idx - file_start_idx)
-                else:
-                    assert (
-                        elements_in_file == f[key].shape[0]
-                    ), f"All keys must have the same number of elements, violated in {file}."
-                if elements_to_load == 0:
-                    break
-                data_idx = idx - start_idx
-                data[key][data_idx : data_idx + elements_to_load] = f[key][
-                    file_start_idx:file_end_idx
-                ]
-        idx += elements_in_file
-        if idx >= end_idx:
+        file_start_idx, file_end_idx = (int(x) for x in Path(file).stem.split("_")[1].split("-"))
+        elements_in_file = file_end_idx - file_start_idx
+        if file_start_idx > end_idx:
             break
-    if idx < end_idx:
+
+        if file_end_idx <= start_idx:
+            continue
+
+        if file_start_idx < start_idx:
+            elements_to_load = min(elements_in_file, file_end_idx - start_idx)
+            offset = start_idx - file_start_idx
+            with h5py.File(file, "r") as f:
+                for key in data_keys:
+                    assert key in f.keys(), f"Key {key} not found in {file}"
+                    if key not in data:
+                        target_shape = (dataset_size, *f[key].shape[1:])
+                        data[key] = np.zeros(target_shape, dtype=f[key].dtype)
+                    data[key][idx : idx + elements_to_load] = f[key][
+                        offset : offset + elements_to_load
+                    ]
+
+            idx += elements_to_load
+        else:
+            elements_to_load = min(elements_in_file, end_idx - file_start_idx)
+            with h5py.File(file, "r") as f:
+                for key in data_keys:
+                    assert key in f.keys(), f"Key {key} not found in {file}"
+                    if key not in data:
+                        target_shape = (dataset_size, *f[key].shape[1:])
+                        data[key] = np.zeros(target_shape, dtype=f[key].dtype)
+                    data[key][idx : idx + elements_to_load] = f[key][:elements_to_load]
+
+            idx += elements_to_load
+
+    if idx < (end_idx - start_idx):
         raise RuntimeError(
             f"Could not load enough data, requested {end_idx - start_idx} elements but only loaded {idx - start_idx} elements."
         )
@@ -144,6 +153,7 @@ class PreloadedNeFDataset(torch.utils.data.Dataset):
         self.path = path
         self.param_structure = get_param_structure(path)
         self.transform = transform
+        self.rng = np.random.default_rng(seed=0)
 
     def __len__(self):
         return self.data[self.data_keys[0]].shape[0]
@@ -151,7 +161,7 @@ class PreloadedNeFDataset(torch.utils.data.Dataset):
     def __getitem__(self, idx):
         batch_item = {key: self.data[key][idx] for key in self.data_keys}
         if self.transform is not None:
-            batch_item, rng = self.transform(batch_item)
+            batch_item, self.rng = self.transform(batch_item, self.rng)
         return batch_item
 
 
