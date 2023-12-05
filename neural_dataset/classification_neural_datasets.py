@@ -64,9 +64,9 @@ class ClassificationNeuralCIFAR10(ClassificationNeFDataset):
 
 class ClassificationNeuralShapeNet(ClassificationNeFDataset):
     splits = {
-        "train": (0, 45000),
-        "val": (45000, 50000),
-        "test": (50000, 60000),
+        "train": (0, 27840),
+        "val": (27840, 31320),
+        "test": (31320, 34800),
     }
 
     def __init__(
