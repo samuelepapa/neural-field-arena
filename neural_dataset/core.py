@@ -49,9 +49,9 @@ def load_data_from_hdf5(
     if end_idx is None:
         end_idx = get_dataset_size(hdf5_files)
     data = {}
-    idx = 0
+    idx = start_idx
     dataset_size = end_idx - start_idx
-    for file in hdf5_files:
+    for file in sorted(hdf5_files, key=lambda x: int(Path(x).stem.split("_")[1].split("-")[0])):
         elements_in_file, elements_to_load = -1, -1
         with h5py.File(file, "r") as f:
             for key in data_keys:
@@ -151,7 +151,7 @@ class PreloadedNeFDataset(torch.utils.data.Dataset):
     def __getitem__(self, idx):
         batch_item = {key: self.data[key][idx] for key in self.data_keys}
         if self.transform is not None:
-            batch_item = self.transform(batch_item)
+            batch_item, rng = self.transform(batch_item)
         return batch_item
 
 

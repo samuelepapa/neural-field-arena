@@ -34,6 +34,7 @@ def name_to_split(split_name: str) -> Tuple[int, int]:
 def compute_mean_std_for_nef_dataset(
     path: str,
     data_split: Union[Tuple[float, float, float], Tuple[int, int, int]],
+    split_names: List[str] = None,
     seed=42,
     batch_size: int = 32,
     num_workers: int = 0,
@@ -61,12 +62,15 @@ def compute_mean_std_for_nef_dataset(
             data_keys=["params"],
             transform=None,
         )
-        loader = torch.utils.data.DataLoader(
+        loaders.append(torch.utils.data.DataLoader(
             dset, batch_size=batch_size, shuffle=False, num_workers=num_workers
-        )
+        ))
         split_start = split_end
 
     all_split_names = splits_to_names(data_split)
+    if split_names is None:
+        split_names = all_split_names
+
     param_keys = get_param_keys(path)
     param_structure = get_param_structure(path)
 
@@ -89,25 +93,25 @@ def compute_mean_std_for_nef_dataset(
 
     full_means = {}
     full_stds = {}
-    for loader, split_name in zip(loaders, all_split_names):
-        logging.debug(f"Split: {split_name}")
+    for loader, split_name, visual_split_name in zip(loaders, all_split_names, split_names):
+        logging.debug(f"Split: {split_name}, Visual Split: {visual_split_name}")
         start_idx, end_idx = name_to_split(split_name)
         if split_type == "exact":
             start_idx = int(start_idx)
             end_idx = int(end_idx)
 
-        if split_name in metadata:
+        if visual_split_name in metadata:
             logging.info(
-                f"Skipping calculation of mean and std for split `{split_name}` because it is already in metadata."
+                f"Skipping calculation of mean and std for split `{visual_split_name}` because it is already in metadata."
             )
             continue
 
         logging.debug(f"Size: {end_idx - start_idx}")
-        means[split_name] = {}
-        mean_squares[split_name] = {}
-        sizes[split_name] = {}
+        means[visual_split_name] = {}
+        mean_squares[visual_split_name] = {}
+        sizes[visual_split_name] = {}
         for batch in loader:
-            nef_params = batch
+            nef_params = batch["params"]
             if norm_type == "per_layer":
                 nef_params_list = numpy_collate(
                     [
@@ -117,10 +121,10 @@ def compute_mean_std_for_nef_dataset(
                 )
 
                 for param_key, param in zip(param_keys, nef_params_list):
-                    if param_key not in means[split_name]:
-                        means[split_name][param_key] = []
-                        mean_squares[split_name][param_key] = []
-                        sizes[split_name][param_key] = []
+                    if param_key not in means[visual_split_name]:
+                        means[visual_split_name][param_key] = []
+                        mean_squares[visual_split_name][param_key] = []
+                        sizes[visual_split_name][param_key] = []
 
                     # create a breakpoint if any of the parameters is nan
                     if np.any(np.isnan(param)):
@@ -130,56 +134,56 @@ def compute_mean_std_for_nef_dataset(
                     # if any of the values in param is nan, set it to 0
                     param = np.nan_to_num(param, nan=0.0)
 
-                    means[split_name][param_key].append(np.mean(param))
-                    mean_squares[split_name][param_key].append(np.mean(param**2))
-                    sizes[split_name][param_key].append(param.shape[0])
+                    means[visual_split_name][param_key].append(np.mean(param))
+                    mean_squares[visual_split_name][param_key].append(np.mean(param**2))
+                    sizes[visual_split_name][param_key].append(param.shape[0])
             else:
-                means[split_name].append(np.mean(nef_params, axis=(0,)))
-                mean_squares[split_name].append(np.mean(nef_params**2, axis=(0,)))
-                sizes[split_name].append(nef_params.shape[0])
+                means[split_visual_split_namename].append(np.mean(nef_params, axis=(0,)))
+                mean_squares[visual_split_name].append(np.mean(nef_params**2, axis=(0,)))
+                sizes[visual_split_name].append(nef_params.shape[0])
 
             del nef_params
-        logging.info(f"Done with split {split_name}")
+        logging.info(f"Done with split {visual_split_name}")
 
         if norm_type == "per_layer":
-            full_means[split_name] = []
-            full_stds[split_name] = []
+            full_means[visual_split_name] = []
+            full_stds[visual_split_name] = []
 
             for param_key, param_shape in param_structure:
                 mean = np.full(
                     param_shape,
-                    np.average(means[split_name][param_key], weights=sizes[split_name][param_key]),
+                    np.average(means[visual_split_name][param_key], weights=sizes[visual_split_name][param_key]),
                 )
                 std = np.full(
                     param_shape,
                     np.sqrt(
                         np.average(
-                            mean_squares[split_name][param_key],
-                            weights=sizes[split_name][param_key],
+                            mean_squares[visual_split_name][param_key],
+                            weights=sizes[visual_split_name][param_key],
                         )
                         - mean**2
                     ),
                 )
-                full_means[split_name].append(mean)
-                full_stds[split_name].append(std)
+                full_means[visual_split_name].append(mean)
+                full_stds[visual_split_name].append(std)
 
-            metadata[split_name] = {
-                "mean": param_list_to_vector(full_means[split_name]).tolist(),
-                "std": param_list_to_vector(full_stds[split_name]).tolist(),
+            metadata[visual_split_name] = {
+                "mean": param_list_to_vector(full_means[visual_split_name]).tolist(),
+                "std": param_list_to_vector(full_stds[visual_split_name]).tolist(),
             }
 
         else:
-            full_means[split_name] = np.average(
-                means[split_name], axis=0, weights=sizes[split_name]
+            full_means[visual_split_name] = np.average(
+                means[visual_split_name], axis=0, weights=sizes[visual_split_name]
             )
-            full_stds[split_name] = np.sqrt(
-                np.average(mean_squares[split_name], axis=0, weights=sizes[split_name])
-                - full_means[split_name] ** 2
+            full_stds[visual_split_name] = np.sqrt(
+                np.average(mean_squares[visual_split_name], axis=0, weights=sizes[visual_split_name])
+                - full_means[visual_split_name] ** 2
             )
 
-            metadata[split_name] = {
-                "mean": full_means[split_name].tolist(),
-                "std": full_stds[split_name].tolist(),
+            metadata[visual_split_name] = {
+                "mean": full_means[visual_split_name].tolist(),
+                "std": full_stds[visual_split_name].tolist(),
             }
 
     # dictionary to json

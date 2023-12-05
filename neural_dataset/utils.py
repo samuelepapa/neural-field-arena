@@ -37,6 +37,31 @@ def numpy_collate(batch: Union[np.ndarray, Sequence[Any], Any]):
         return {key: numpy_collate([d[key] for d in batch]) for key in batch[0]}
     else:
         return np.array(batch)
+    
+def torch_collate(batch: Union[np.ndarray, Sequence[Any], Any]):
+    """Collate function for numpy arrays.
+
+    This function acts as replacement to the standard PyTorch-tensor collate function in PyTorch DataLoader.
+
+    Args:
+        batch: Batch of data. Can be a numpy array, a list of numpy arrays, or nested lists of numpy arrays.
+
+    Returns:
+        Batch of data as (potential list or tuple of) numpy array(s).
+    """
+    # dict collate
+
+    if isinstance(batch, np.ndarray):
+        return torch.tensor(batch)
+    elif isinstance(batch[0], np.ndarray):
+        return torch.tensor(np.stack(batch))
+    elif isinstance(batch[0], (tuple, list)):
+        transposed = zip(*batch)
+        return [numpy_collate(samples) for samples in transposed]
+    elif isinstance(batch[0], dict):
+        return {key: numpy_collate([d[key] for d in batch]) for key in batch[0]}
+    else:
+        return torch.tensor(batch)
 
 
 def get_param_structure(path: str):
