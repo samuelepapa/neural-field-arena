@@ -13,7 +13,11 @@ We provide a simple interface to load the neural datasets from the **Neural Fiel
 
 The neural fields have been stored in an efficient vectorized format, to allow for quick read and compact storage. The conversion from vectorized to list format, which most of the literature uses, is very straightforward and a specific transform is provided as part of the transformation package.
 
-Soon this library will be available on PyPI. The datasets will also available soon on Zenodo, and they will be downloaded automatically when a dataset is selected.
+Soon this library will be available on PyPI.
+
+## Download
+
+To download the datasets, use this link: [https://doi.org/10.5281/zenodo.10392793](https://doi.org/10.5281/zenodo.10392793).
 
 ## Contributing
 
@@ -32,7 +36,3 @@ Distributed under the MIT License. See `LICENSE` for more information.
 ## Acknowledgements and Contributions
 
 We thank Miltiadis Kofina, and David Romero for the feedback during development.
-
-## Contact
-
-[Samuele Papa](http://samuelepapa.github.io) - [Riccardo Valperga](https://twitter.com/RValperga) - [Phillip Lippe](<>) - [David Knigge](<>)
