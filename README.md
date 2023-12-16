@@ -5,7 +5,8 @@ Creators: [Samuele Papa](https://samuelepapa.github.io), [Riccardo Valperga](htt
 [![License: MIT](https://img.shields.io/badge/License-MIT-purple)](https://opensource.org/licenses/MIT)
 [![Python](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/release/python-390/)
 [![Style](https://img.shields.io/badge/code%20style-black-000000)](https://github.com/psf/black)
-![Schema](assets/neural-field-arena.jpg)
+
+<p align="center"><img src="assets/neural-field-arena.jpg" width="300" /></p>
 
 We provide a simple interface to load the neural datasets from the **Neural Field Arena**.
 
