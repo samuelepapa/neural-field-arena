@@ -1,6 +1,6 @@
 # 🖼️ **Neural Field Arena** - Neural datasets made easy
 
-Creators: [Samuele Papa](https://samuelepapa.github.io), [Riccardo Valperga](https://twitter.com/RValperga), [Phillip Lippe](https://phlippe.github.io/) [David Knigge](https://twitter.com/davidmknigge).
+Creators: [Samuele Papa](https://samuelepapa.github.io), [Riccardo Valperga](https://twitter.com/RValperga), [Phillip Lippe](https://phlippe.github.io/), [David Knigge](https://twitter.com/davidmknigge).
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-purple)](https://opensource.org/licenses/MIT)
 [![Python](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/release/python-390/)
@@ -36,4 +36,4 @@ Distributed under the MIT License. See `LICENSE` for more information.
 
 ## Acknowledgements and Contributions
 
-We thank Miltiadis Kofina, and David Romero for the feedback during development.
+We thank [Miltiadis Kofinas](https://mkofinas.github.io/), and David Romero for the feedback during development.
